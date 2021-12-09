@@ -140,14 +140,13 @@ contract MonthlyVesting is VestingWalletModified {
     uint64 constant time_TenMinutes = 10 * 60;
     uint64 constant time_FiveMinutes = 5 * 60;
     uint64 constant time_OneYear = 365 * 24 * 60 * 60;
-
-
-    uint64 timeStep = time_FiveMinutes;
+    uint64 public timeStep;
 
 
     constructor(uint64 _timeStep, address _receiver, uint64 _startTime, uint64 _durationTime ) VestingWalletModified(_receiver,_startTime, _durationTime) {
         timeStep = _timeStep;
     }
+    
 
     
     function _vestingSchedule(uint256 totalAllocation, uint64 timestamp) internal view override returns (uint256) {
@@ -161,3 +160,19 @@ contract MonthlyVesting is VestingWalletModified {
         }
     }
 }
+
+contract MonthlyVestingFactory {
+    event Deploy(address indexed _from);
+
+    mapping(address => MonthlyVesting) public _vestingContracts;
+
+    
+
+    function createVesting(uint64 _timeStep, address _receiver, uint64 _startTime, uint64 _durationTime) public returns (uint64, address, uint64, uint64) {
+        _vestingContracts[_receiver] = new MonthlyVesting(_timeStep, _receiver, _startTime, _durationTime);
+        emit Deploy(msg.sender);
+        return (_timeStep, _receiver, _startTime, _durationTime);
+    }
+}
+
+
